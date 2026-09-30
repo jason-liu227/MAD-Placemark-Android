@@ -1,7 +1,7 @@
-package com.example.placemark_lab2.main
+package com.example.placemarks.main
 
-import com.example.placemark_lab2.models.PlacemarkMemStore
-import com.example.placemark_lab2.models.PlacemarkModel
+import com.example.placemarks.models.PlacemarkMemStore
+import com.example.placemarks.models.PlacemarkModel
 
 val store = PlacemarkMemStore()
 

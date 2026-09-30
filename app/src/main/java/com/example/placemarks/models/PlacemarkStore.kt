@@ -1,4 +1,4 @@
-package com.example.placemark_lab2.models
+package com.example.placemarks.models
 
 interface PlacemarkStore {
     fun findAll(): List<PlacemarkModel>

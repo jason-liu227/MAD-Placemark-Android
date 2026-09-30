@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.placemark_lab2"
+    namespace = "com.example.placemarks"
     compileSdk {
         version = release(37)
     }
