@@ -1,4 +1,4 @@
-package com.example.placemark_lab2
+package com.example.placemarks
 
 import org.junit.Test
 
