@@ -1,6 +1,6 @@
 package com.example.placemarks
 
-import org.setu.placemarks.PlacedMarkList
+import com.example.placemarks.PlacedMarkList
 
 object AppData {
     val placedMarks = PlacedMarkList()
