@@ -1,0 +1,27 @@
+[33mcommit 272499366506784fa3025cb689e24206a7729452[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/issue-2-lab2-userinterface[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: ea7db27 1b9e16d
+Author: JasonLiu <56544254+jason-liu227@users.noreply.github.com>
+Date:   Wed Sep 23 11:06:25 2026 +0100
+
+    Merge pull request #2 from jason-liu227/feature/issue-1-lab1-setup
+    
+    Feature/issue 1 lab1 setup
+
+[33mcommit 1b9e16de167f7f8dbd4504c79c1a14a380315ff2[m[33m ([m[1;31morigin/feature/issue-1-lab1-setup[m[33m, [m[1;32mfeature/issue-1-lab1-setup[m[33m)[m
+Merge: 27dc6ec ea7db27
+Author: JasonLiu <jasonliudehui227@gmail.com>
+Date:   Wed Sep 23 11:03:47 2026 +0100
+
+    git conflict for .gitignore
+
+[33mcommit 27dc6ec8dcf3f72330898ce7c9193d72de32ec1b[m
+Author: JasonLiu <jasonliudehui227@gmail.com>
+Date:   Wed Sep 23 10:59:00 2026 +0100
+
+    First lab setup with coordinates implemented
+
+[33mcommit ea7db275bff6663f5977b10a5f739945df8d7546[m[33m ([m[1;31morigin/issue-1-lab1-setup[m[33m)[m
+Author: JasonLiu <56544254+jason-liu227@users.noreply.github.com>
+Date:   Wed Sep 23 09:37:17 2026 +0100
+
+    Initial commit

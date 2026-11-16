@@ -6,7 +6,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.setu.placemarks.PlacedMark
+import com.example.placemarks.PlacedMark
 
 class AddEditActivity : AppCompatActivity() {
 
