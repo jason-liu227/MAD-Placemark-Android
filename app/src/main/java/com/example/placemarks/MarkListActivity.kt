@@ -3,10 +3,11 @@ package com.example.placemarks
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
+import timber.log.Timber
 
 class MarkListActivity : AppCompatActivity() {
 
@@ -18,18 +19,24 @@ class MarkListActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_mark_list)
 
+        Timber.d("MarkListActivity opened")
+
         recyclerView =
             findViewById(R.id.marksRecyclerView)
 
         adapter = PlacedMarkAdapter(
             marks = AppData.placedMarks.findAll(),
 
-            onEdit = { mark ->
-                editMark(mark)
-            },
+            listener = object : OnMarkListener {
 
-            onDelete = { mark ->
-                deleteMark(mark)
+                override fun onMarkClick(mark: PlacedMark) {
+                    editMark(mark)
+                }
+
+                override fun onMarkLongClick(mark: PlacedMark): Boolean {
+                    confirmDelete(mark)
+                    return true
+                }
             }
         )
 
@@ -42,10 +49,8 @@ class MarkListActivity : AppCompatActivity() {
             findViewById<Button>(R.id.returnButton)
 
         returnButton.setOnClickListener {
-
-            startActivity(
-                Intent(this, MainActivity::class.java)
-            )
+            Timber.d("Returning to main menu")
+            finish()
         }
     }
 
@@ -62,6 +67,8 @@ class MarkListActivity : AppCompatActivity() {
 
     private fun editMark(mark: PlacedMark) {
 
+        Timber.d("Editing mark id=${mark.id}")
+
         val intent =
             Intent(this, AddEditActivity::class.java)
 
@@ -70,9 +77,27 @@ class MarkListActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun confirmDelete(mark: PlacedMark) {
+
+        AlertDialog.Builder(this)
+            .setTitle("Delete this mark?")
+            .setMessage("Are you sure you want to delete this mark?")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteMark(mark)
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                Timber.d("Deletion cancelled")
+            }
+            .show()
+    }
+
     private fun deleteMark(mark: PlacedMark) {
 
-        AppData.placedMarks.delete(mark.id)
+        if (AppData.placedMarks.delete(mark.id)) {
+            Timber.d("Deleted mark id=${mark.id}")
+        } else {
+            Timber.w("Failed to delete mark id=${mark.id}")
+        }
 
         adapter.updateMarks(
             AppData.placedMarks.findAll()
