@@ -6,6 +6,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import timber.log.Timber
 
 class AddEditActivity : AppCompatActivity() {
 
@@ -20,6 +21,8 @@ class AddEditActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_add_edit)
+
+        Timber.d("AddEditActivity opened")
 
         titleInput =
             findViewById(R.id.titleInput)
@@ -45,27 +48,38 @@ class AddEditActivity : AppCompatActivity() {
 
         if (editingId != null) {
 
+            Timber.d("Editing mark id=$editingId")
+
             findViewById<TextView>(R.id.formTitle)
                 .text = "Edit Mark"
 
             loadExistingMark(editingId!!)
+
+        } else {
+            Timber.d("Adding a new mark")
         }
 
         saveButton.setOnClickListener {
+            Timber.d("Save button clicked")
             saveMark()
         }
 
         cancelButton.setOnClickListener {
+            Timber.d("Add/Edit cancelled")
             finish()
         }
     }
 
     private fun loadExistingMark(id: Long) {
 
+        Timber.d("Loading mark id=$id")
+
         val mark =
             AppData.placedMarks.findOne(id)
 
         if (mark == null) {
+
+            Timber.w("Mark not found: id=$id")
 
             Toast.makeText(
                 this,
@@ -92,6 +106,7 @@ class AddEditActivity : AppCompatActivity() {
             descriptionInput.text.toString().trim()
 
         if (title.isEmpty()) {
+            Timber.w("Validation failed: title is empty")
             titleInput.error = "Title is required"
             return
         }
@@ -100,6 +115,7 @@ class AddEditActivity : AppCompatActivity() {
             xInput.text.toString().toDoubleOrNull()
 
         if (x == null) {
+            Timber.w("Validation failed: invalid X coordinate")
             xInput.error = "Enter a valid number"
             return
         }
@@ -108,6 +124,7 @@ class AddEditActivity : AppCompatActivity() {
             yInput.text.toString().toDoubleOrNull()
 
         if (y == null) {
+            Timber.w("Validation failed: invalid Y coordinate")
             yInput.error = "Enter a valid number"
             return
         }
@@ -122,6 +139,8 @@ class AddEditActivity : AppCompatActivity() {
             )
 
             AppData.placedMarks.create(mark)
+
+            Timber.d("Created mark id=${mark.id}")
 
             Toast.makeText(
                 this,
@@ -140,6 +159,8 @@ class AddEditActivity : AppCompatActivity() {
             )
 
             AppData.placedMarks.update(mark)
+
+            Timber.d("Updated mark id=${mark.id}")
 
             Toast.makeText(
                 this,
