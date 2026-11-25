@@ -1,7 +1,7 @@
 package com.example.placemarks.main
 
 import com.example.placemarks.models.PlacemarkMemStore
-import com.example.placemarks.models.PlacemarkModel
+import com.example.placemarks.PlacedMark
 
 val store = PlacemarkMemStore()
 
@@ -44,7 +44,7 @@ fun addPlacemark() {
     val description = readlnOrNull()?.trim().orEmpty()
 
     if (title.isNotEmpty()) {
-        val placemark = PlacemarkModel(title = title, description = description)
+        val placemark = PlacedMark(title = title, description = description)
         store.create(placemark)
         println("Placemark added successfully with ID: ${placemark.id}")
     } else {
@@ -86,7 +86,7 @@ fun updatePlacemark() {
         val y = readlnOrNull()?.trim().orEmpty()
 
         if (title.isNotEmpty()) {
-            val updated = store.update(PlacemarkModel(id = id, title = title, description = description))
+            val updated = store.update(PlacedMark(id = id, title = title, description = description))
             if (updated) println("Placemark updated successfully.")
         } else {
             println("Title cannot be empty. Update cancelled.")
