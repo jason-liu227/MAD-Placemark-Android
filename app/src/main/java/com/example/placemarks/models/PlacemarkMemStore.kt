@@ -1,22 +1,25 @@
 package com.example.placemarks.models
 
+import com.example.placemarks.PlacedMark
 import java.util.concurrent.atomic.AtomicLong
 
 class PlacemarkMemStore : PlacemarkStore {
 
-    private val placemarks = ArrayList<PlacemarkModel>()
+    private val placemarks = ArrayList<PlacedMark>()
     private val lastId = AtomicLong(0L)
 
-    override fun findAll(): List<PlacemarkModel> {
+    override fun findAll(): List<PlacedMark> {
         return placemarks
     }
 
-    override fun create(placemark: PlacemarkModel) {
+    override fun create(placemark: PlacedMark) {
+        placemark.validate()
         placemark.id = lastId.incrementAndGet()
         placemarks.add(placemark)
     }
 
-    override fun update(placemark: PlacemarkModel): Boolean {
+    override fun update(placemark: PlacedMark): Boolean {
+        placemark.validate()
         val foundPlacemark = findOne(placemark.id)
         return if (foundPlacemark != null) {
             foundPlacemark.title = placemark.title
@@ -24,6 +27,7 @@ class PlacemarkMemStore : PlacemarkStore {
             foundPlacemark.description = placemark.description
             foundPlacemark.x = placemark.x
             foundPlacemark.y = placemark.y
+            foundPlacemark.imageUri = placemark.imageUri
             true
         } else {
             false
@@ -40,7 +44,7 @@ class PlacemarkMemStore : PlacemarkStore {
         }
     }
 
-    override fun findOne(id: Long): PlacemarkModel? {
+    override fun findOne(id: Long): PlacedMark? {
         return placemarks.find { p -> p.id == id }
     }
 }

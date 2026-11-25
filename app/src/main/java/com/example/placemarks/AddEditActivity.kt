@@ -7,6 +7,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import timber.log.Timber
+import android.net.Uri
+import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 
 class AddEditActivity : AppCompatActivity() {
 
@@ -14,8 +17,30 @@ class AddEditActivity : AppCompatActivity() {
     private lateinit var descriptionInput: EditText
     private lateinit var xInput: EditText
     private lateinit var yInput: EditText
+    private lateinit var imagePreview: ImageView
+    private var selectedImageUri: Uri? = null
 
     private var editingId: Long? = null
+
+    private val imagePicker = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+
+        if (uri != null) {
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: SecurityException) {
+                Timber.w("Persistent image access unavailable")
+            }
+
+            selectedImageUri = uri
+            imagePreview.setImageURI(uri)
+
+            Timber.d("Image selected")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,34 +49,27 @@ class AddEditActivity : AppCompatActivity() {
 
         Timber.d("AddEditActivity opened")
 
-        titleInput =
-            findViewById(R.id.titleInput)
+        titleInput = findViewById(R.id.titleInput)
 
-        descriptionInput =
-            findViewById(R.id.descriptionInput)
+        descriptionInput = findViewById(R.id.descriptionInput)
 
-        xInput =
-            findViewById(R.id.xInput)
+        xInput = findViewById(R.id.xInput)
 
-        yInput =
-            findViewById(R.id.yInput)
+        yInput = findViewById(R.id.yInput)
 
-        val saveButton =
-            findViewById<Button>(R.id.saveButton)
+        imagePreview = findViewById(R.id.imageView)
 
-        val cancelButton =
-            findViewById<Button>(R.id.cancelButton)
+        val saveButton = findViewById<Button>(R.id.saveButton)
 
-        editingId =
-            intent.getLongExtra("id", -1L)
-                .takeIf { it != -1L }
+        val cancelButton = findViewById<Button>(R.id.cancelButton)
+
+        editingId = intent.getLongExtra("id", -1L).takeIf { it != -1L }
 
         if (editingId != null) {
 
             Timber.d("Editing mark id=$editingId")
 
-            findViewById<TextView>(R.id.formTitle)
-                .text = "Edit Mark"
+            findViewById<TextView>(R.id.formTitle).text = "Edit Mark"
 
             loadExistingMark(editingId!!)
 
@@ -68,23 +86,25 @@ class AddEditActivity : AppCompatActivity() {
             Timber.d("Add/Edit cancelled")
             finish()
         }
+
+        findViewById<Button>(R.id.addImage)
+            .setOnClickListener {
+                imagePicker.launch(arrayOf("image/*"))
+            }
     }
 
     private fun loadExistingMark(id: Long) {
 
         Timber.d("Loading mark id=$id")
 
-        val mark =
-            AppData.placedMarks.findOne(id)
+        val mark = AppData.placedMarks.findOne(id)
 
         if (mark == null) {
 
             Timber.w("Mark not found: id=$id")
 
             Toast.makeText(
-                this,
-                "Mark not found",
-                Toast.LENGTH_SHORT
+                this, "Mark not found", Toast.LENGTH_SHORT
             ).show()
 
             finish()
@@ -92,83 +112,106 @@ class AddEditActivity : AppCompatActivity() {
         }
 
         titleInput.setText(mark.title)
-        descriptionInput.setText(mark.desc)
+        descriptionInput.setText(mark.description)
         xInput.setText(mark.x.toString())
         yInput.setText(mark.y.toString())
+        selectedImageUri = mark.imageUri?.let { Uri.parse(it) }
+
+        if (selectedImageUri != null) {
+            imagePreview.setImageURI(selectedImageUri)
+        } else {
+            imagePreview.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
     }
 
     private fun saveMark() {
 
-        val title =
-            titleInput.text.toString().trim()
+        val title = titleInput.text.toString().trim()
 
-        val description =
-            descriptionInput.text.toString().trim()
+        val description = descriptionInput.text.toString().trim()
 
-        if (title.isEmpty()) {
+        if (title.isBlank()) {
             Timber.w("Validation failed: title is empty")
             titleInput.error = "Title is required"
             return
         }
 
-        val x =
-            xInput.text.toString().toDoubleOrNull()
+        val x = xInput.text.toString().toDoubleOrNull()
 
-        if (x == null) {
-            Timber.w("Validation failed: invalid X coordinate")
-            xInput.error = "Enter a valid number"
+        if (x == null || !x.isFinite() || x !in -90.0..90.0) {
+            Timber.w("Validation failed: invalid latitude")
+            xInput.error = "Latitude must be between -90 and 90"
             return
         }
 
-        val y =
-            yInput.text.toString().toDoubleOrNull()
+        val y = yInput.text.toString().toDoubleOrNull()
 
-        if (y == null) {
-            Timber.w("Validation failed: invalid Y coordinate")
-            yInput.error = "Enter a valid number"
+        if (y == null || !y.isFinite() || y !in -180.0..180.0) {
+            Timber.w("Validation failed: invalid longitude")
+            yInput.error = "Longitude must be between -180 and 180"
             return
         }
 
-        if (editingId == null) {
+        try {
 
-            val mark = PlacedMark(
-                title = title,
-                desc = description,
-                x = x,
-                y = y
-            )
+            if (editingId == null) {
 
-            AppData.placedMarks.create(mark)
+                val mark = PlacedMark(
+                    title = title,
+                    description = description,
+                    x = x,
+                    y = y,
+                    imageUri = selectedImageUri?.toString()
+                )
 
-            Timber.d("Created mark id=${mark.id}")
+                mark.validate()
+
+                AppData.placedMarks.create(mark)
+
+                Timber.d("Created mark id=${mark.id}")
+
+                Toast.makeText(
+                    this, "Mark created", Toast.LENGTH_SHORT
+                ).show()
+
+            } else {
+
+                val mark = PlacedMark(
+                    id = editingId!!,
+                    title = title,
+                    description = description,
+                    x = x,
+                    y = y,
+                    imageUri = selectedImageUri?.toString()
+                )
+
+                mark.validate()
+
+                if (!AppData.placedMarks.update(mark)) {
+                    Toast.makeText(
+                        this, "Mark not found", Toast.LENGTH_SHORT
+                    ).show()
+
+                    return
+                }
+
+                Timber.d("Updated mark id=${mark.id}")
+
+                Toast.makeText(
+                    this, "Mark updated", Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            finish()
+
+        } catch (e: IllegalArgumentException) {
+
+            Timber.w("Placemark validation failed")
 
             Toast.makeText(
-                this,
-                "Mark created",
-                Toast.LENGTH_SHORT
-            ).show()
-
-        } else {
-
-            val mark = PlacedMark(
-                id = editingId!!,
-                title = title,
-                desc = description,
-                x = x,
-                y = y
-            )
-
-            AppData.placedMarks.update(mark)
-
-            Timber.d("Updated mark id=${mark.id}")
-
-            Toast.makeText(
-                this,
-                "Mark updated",
-                Toast.LENGTH_SHORT
+                this, e.message ?: "Please check the entered values.", Toast.LENGTH_LONG
             ).show()
         }
-
         finish()
     }
 }
