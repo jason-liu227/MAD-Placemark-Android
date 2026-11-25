@@ -72,10 +72,10 @@
                 app:srcCompat="@android:drawable/ic_menu_gallery" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/addImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Button" />
+                android:text="Add Image" />
 
             <Button
                 android:id="@+id/saveButton"

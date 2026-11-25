@@ -57,6 +57,8 @@ class AddEditActivity : AppCompatActivity() {
 
         yInput = findViewById(R.id.yInput)
 
+        imagePreview = findViewById(R.id.imageView)
+
         val saveButton = findViewById<Button>(R.id.saveButton)
 
         val cancelButton = findViewById<Button>(R.id.cancelButton)
@@ -84,6 +86,11 @@ class AddEditActivity : AppCompatActivity() {
             Timber.d("Add/Edit cancelled")
             finish()
         }
+
+        findViewById<Button>(R.id.addImage)
+            .setOnClickListener {
+                imagePicker.launch(arrayOf("image/*"))
+            }
     }
 
     private fun loadExistingMark(id: Long) {
